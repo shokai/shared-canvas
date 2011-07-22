@@ -5,6 +5,7 @@ get '/' do
 end
 
 get '/http*' do
+  @title = @@conf['title']
   puts @img_url = 'http' + params[:splat].to_s
   haml :draw
 end
