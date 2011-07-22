@@ -27,6 +27,9 @@ var draw_line = function(data){
 
 $(function(){
     $('#stroke select#size').val(4);
+    $('#ctrl input#btn_reset').click(function(){
+        ws.send(JSON.stringify({type: 'cmd', cmd: 'reset'}));
+    });
     draw_img(img_url, function(){
         if(typeof WebSocket != 'undefined') ws = new WebSocket(ws_url);
         else{
@@ -35,8 +38,12 @@ $(function(){
         
         ws.onmessage = function(e){
             var data = JSON.parse(e.data);
+            console.log(data);
             if(data.type == 'init'){
                 sid = data.sid;
+            }
+            else if(data.type == 'cmd'){
+                if(data.cmd == 'reset') draw_img(img_url);
             }
             else if(data.type == 'line'){
                 if(data.sid != sid) draw_line(data);
@@ -64,8 +71,6 @@ $(function(){
 		var rect = e.target.getBoundingClientRect();
 		var x = e.clientX - rect.left;
         var y = e.clientY - rect.top;
-        console.log(x + ', ' + y);
-
         if(sketch.p_pos.x && sketch.p_pos.y){
             var line_data = {
                 type : 'line',

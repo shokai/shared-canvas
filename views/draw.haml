@@ -26,4 +26,6 @@
         %select{:id => 'size'}
           - for i in 1..10 do
             %option{:value => i}= i
+      %div{:id => 'ctrl'}
+        %input{:id => 'btn_reset', :type => 'button', :value => 'RESET'}
     %canvas#img

@@ -13,9 +13,11 @@ EM::run do
   @channel = EM::Channel.new
   @logs = Array.new
   @sids = Hash.new
-  @channel.subscribe{|mes|
-    @logs.push mes
-    @logs.shift if @logs.size > MAX_LOG
+  @channel.subscribe{|data|
+    @logs.push data if data['type'].to_s != 'cmd'
+    while @logs.size > MAX_LOG
+      @logs.shift
+    end
   }
 
   EM::WebSocket.start(:host => "0.0.0.0", :port => port) do |ws|
@@ -36,7 +38,16 @@ EM::run do
               ws.send(data.to_json) if data['img_url'] == @sids[sid]
             }
           else
-            data[:sid] = sid
+            if data['type'].to_s == 'cmd'
+              if data['cmd'].to_s == 'reset'
+                img_url = @sids[sid]
+                @logs = @logs.delete_if{|log|
+                  log['img_url'] == img_url
+                }
+              end
+            end
+            data['sid'] = sid
+            data['img_url'] = @sids[sid]
             @channel.push(data)
           end
         rescue => e
