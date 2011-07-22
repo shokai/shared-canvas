@@ -6,5 +6,6 @@ end
 
 get '/http*' do
   puts @img_url = 'http' + params[:splat].to_s
-  haml :index
+  haml :draw
 end
+
