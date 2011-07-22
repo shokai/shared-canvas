@@ -5,7 +5,7 @@ require 'json'
 port = 8081
 port = ARGV.first.to_i if ARGV.size > 0
 
-MAX_LOG = 1000
+MAX_LOG = 100000
 
 EM::run do
 
