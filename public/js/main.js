@@ -1,27 +1,6 @@
 
 var sid = null;
-if(typeof WebSocket != 'undefined') var ws = new WebSocket(ws_url);
-else{
-    alert('use Google Chrome or Safari');
-}
-
-ws.onmessage = function(e){
-    var data = JSON.parse(e.data);
-    console.log(data);
-    if(data.type == 'init'){
-        sid = data.sid;
-    }
-    else if(data.type == 'line'){
-        if(data.sid != sid) draw_line(data);
-    }
-};
-ws.onclose = function(){
-    console.log("websocket closed");
-    alert("websocket closed");
-};
-ws.onopen = function(){
-    console.log("websocket connected!!");
-};
+var ws = null;
 
 var ctx;
 var sketch = {
@@ -49,9 +28,29 @@ var draw_line = function(data){
 
 $(function(){
     $('#stroke select#size').val(4);
-    draw_img('./shokai-big.jpg');
-    $('input#btn_draw').click(function(){
-        draw_img($('input#img_url').val());
+    draw_img(img_url, function(){
+        if(typeof WebSocket != 'undefined') ws = new WebSocket(ws_url);
+        else{
+            alert('use Google Chrome or Safari');
+        }
+        
+        ws.onmessage = function(e){
+            var data = JSON.parse(e.data);
+            if(data.type == 'init'){
+                sid = data.sid;
+            }
+            else if(data.type == 'line'){
+                if(data.sid != sid) draw_line(data);
+            }
+        };
+        ws.onclose = function(){
+            console.log("websocket closed");
+            alert("websocket closed");
+        };
+        ws.onopen = function(){
+            console.log("websocket connected!!");
+        };
+        
     });
     $('canvas#img').mousedown(function(){
         sketch.drawing = true;
@@ -84,13 +83,14 @@ $(function(){
     });
 });
 
-var draw_img = function(img_url){
+var draw_img = function(img_url, onload){
     var img_tag = $('canvas#img');
     ctx = img_tag[0].getContext('2d');
     var img = new Image();
     img.onload = function(){
         img_tag.attr('width', img.width).attr('height', img.height);
         ctx.drawImage(img, 0, 0, img.width, img.height);
+        if(onload && typeof onload == 'function') onload();
     };
     img.src = img_url;
 };

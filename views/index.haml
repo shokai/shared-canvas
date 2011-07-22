@@ -5,16 +5,13 @@
     %meta{'http-equiv' => 'Content-Type', :content => 'text/html', :charset => 'UTF-8'}
     :javascript
       var app_root = "#{app_root}";
+      var img_url = "#{@img_url}";
       var ws_url = "#{@@conf['ws_url']}"
     %script{:type => 'text/javascript', :src => "#{app_root}/js/jquery.js"}
     %script{:type => 'text/javascript', :src => "#{app_root}/js/main.js"}
   %body
     %h1= @title
     %div
-      %div
-        Image URL : 
-        %input{:id => 'img_url', :type => 'text', :value => "#{app_root}/shokai-big.jpg", :size => '50'}
-        %input{:id => 'btn_draw', :type => 'button', :value => 'draw'}
       %div{:id => 'stroke'}
         color : 
         %select{:id => 'color'}

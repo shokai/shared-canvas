@@ -4,11 +4,7 @@ get '/' do
   haml :index
 end
 
-get '/omikuji.json' do
-  content_type = 'application/json'
-  arr = ['大吉', '中吉', '小吉', 'マジキチ', '凶']
-  @mes = {
-    :result => arr.choice,
-    :time => Time.now.to_s
-  }.to_json
+get '/http*' do
+  puts @img_url = 'http' + params[:splat].to_s
+  haml :index
 end
