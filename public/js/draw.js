@@ -1,4 +1,3 @@
-
 var sid = null;
 var ws = null;
 
@@ -49,6 +48,7 @@ $(function(){
         };
         ws.onopen = function(){
             console.log("websocket connected!!");
+            ws.send(JSON.stringify({type : 'init', img_url : img_url}));
         };
         
     });
@@ -69,6 +69,7 @@ $(function(){
         if(sketch.p_pos.x && sketch.p_pos.y){
             var line_data = {
                 type : 'line',
+                img_url : img_url,
                 strokeStyle : $('#stroke select#color').val(),
                 lineWidth : $('#stroke select#size').val(),
                 lineCap : 'square',

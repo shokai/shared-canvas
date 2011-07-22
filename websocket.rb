@@ -12,6 +12,7 @@ EM::run do
   puts "server start - port:#{port}"
   @channel = EM::Channel.new
   @logs = Array.new
+  @sids = Hash.new
   @channel.subscribe{|mes|
     @logs.push mes
     @logs.shift if @logs.size > MAX_LOG
@@ -20,20 +21,34 @@ EM::run do
   EM::WebSocket.start(:host => "0.0.0.0", :port => port) do |ws|
     ws.onopen{
       sid = @channel.subscribe{|mes|
-        ws.send(mes)
+        begin
+          data = JSON.parse(mes)
+          ws.send(data.to_json) if @sids[sid] == data['img_url']
+        rescue => e
+          STDERR.puts e
+        end
       }
       puts "<#{sid}> connected!!"
       ws.send({:type => :init, :sid => sid}.to_json)
-      @logs.each{|mes|
-        ws.send(mes)
-      }
 
       ws.onmessage{|mes|
         puts "<#{sid}> #{mes}"
         begin
           data = JSON.parse(mes)
-          data[:sid] = sid
-          @channel.push(data.to_json)
+          if data['type'].to_s == 'init'
+            @sids[sid] = data['img_url']
+            @logs.each{|mes|
+              begin
+                tmp = JSON.parse(mes)
+                ws.send(tmp.to_json) if tmp['img_url'] == @sids[sid]
+              rescue => e
+                STDERR.puts e
+              end
+            }
+          else
+            data[:sid] = sid
+            @channel.push(data.to_json)
+          end
         rescue => e
           STDERR.puts e
         end
@@ -41,17 +56,10 @@ EM::run do
 
       ws.onclose{
         puts "<#{sid}> disconnected"
+        @sids.delete(sid)
         @channel.unsubscribe(sid)
         @channel.push({:type => :event, :msg => "#{sid} disconnected"}.to_json)
       }
     }
-  end
-
-  EM::defer do
-    loop do
-      puts Time.now.to_s
-      @channel.push Time.now.to_s
-      sleep 60*60*3
-    end
   end
 end
