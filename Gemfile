@@ -6,4 +6,4 @@ gem 'thin'
 gem 'sinatra-reloader'
 gem 'json'
 gem 'haml'
-gem 'erubis'
+

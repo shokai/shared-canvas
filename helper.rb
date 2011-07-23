@@ -4,8 +4,6 @@ require 'rack'
 require 'sinatra/reloader' if development?
 require 'yaml'
 require 'json'
-require 'erubis'
-set :erubis, :escape_html => true
 
 begin
   @@conf = YAML::load open(File.dirname(__FILE__)+'/config.yaml').read
@@ -14,6 +12,11 @@ rescue => e
   STDERR.puts 'config.yaml load error!'
   STDERR.puts e
   exit 1
+end
+
+helpers do
+  include Rack::Utils
+  alias_method :h, :escape_html
 end
 
 def app_root
